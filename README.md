@@ -35,8 +35,10 @@ pnpm build
 pnpm dev
 ```
 
-- Web: http://localhost:5173
+- Web: https://localhost:5173 (HTTPS — required for phone mic testing)
 - API: http://localhost:3001
+
+**Phone testing:** Use the `https://192.168.x.x:5173` URL from the Vite terminal on the same Wi‑Fi. Accept the certificate warning once. HTTP will not show a mic prompt on mobile.
 
 Without GCP credentials, the API uses a mock speech provider for development.
 

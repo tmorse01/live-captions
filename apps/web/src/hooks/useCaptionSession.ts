@@ -3,6 +3,7 @@ import type { ErrorEvent, ServerMessage } from '@live-captions/contracts';
 import { AudioCapture, int16ToBase64 } from '../audio/capture';
 import { useMicrophone } from '../audio/useMicrophone';
 import { RealtimeClient, type ConnectionState } from '../realtime/client';
+import { getWsUrl } from '../realtime/ws-url';
 import { latencyTracker } from '../realtime/latency';
 import { TranscriptBuffer, type CaptionLine } from '../realtime/transcript-buffer';
 
@@ -21,8 +22,6 @@ export interface CaptionSessionState {
   interimLine: CaptionLine | null;
   error: ErrorEvent | null;
 }
-
-const WS_URL = import.meta.env.VITE_API_WS_URL ?? 'ws://localhost:3001/ws';
 
 export function useCaptionSession() {
   const mic = useMicrophone();
@@ -94,7 +93,7 @@ export function useCaptionSession() {
     latencyTracker.reset();
 
     const client = new RealtimeClient({
-      url: WS_URL,
+      url: getWsUrl(),
       onMessage: handleServerMessage,
       onConnectionChange: (state) => {
         setConnectionState(state);

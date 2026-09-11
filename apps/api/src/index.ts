@@ -13,7 +13,8 @@ const env = parseApiEnv();
 const app = Fastify({ logger: true });
 
 await app.register(cors, {
-  origin: env.WEB_ORIGIN,
+  // Reflect request origin in dev so phone testing over LAN HTTPS works.
+  origin: process.env.NODE_ENV === 'production' ? env.WEB_ORIGIN : true,
 });
 
 await app.register(websocket);
