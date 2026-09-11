@@ -5,7 +5,7 @@
     "buildCommand": "cd ../.. && pnpm install && pnpm --filter @live-captions/contracts build && pnpm --filter @live-captions/ui build && pnpm --filter @live-captions/web build"
   },
   "deploy": {
-    "startCommand": "pnpm preview --host 0.0.0.0 --port $PORT",
+    "startCommand": "pnpm exec vite preview --host 0.0.0.0 --port $PORT",
     "healthcheckPath": "/",
     "healthcheckTimeout": 30
   }
