@@ -8,16 +8,20 @@
   --caption-font-size-history: clamp(0.875rem, 2.5vw, 1.125rem);
   --caption-line-height: 1.25;
   --color-bg: #ffffff;
-  --color-text: #202124;
+  --color-text: #1a1a1a;
   --color-text-muted: #5f6368;
-  --color-interim: #202124;
-  --color-accent: #4285f4;
-  --color-error: #ea4335;
+  --color-interim: #1a1a1a;
+  --color-accent: #115e59;
+  --color-live: #dc2626;
+  --color-error: #b91c1c;
+  --color-error-bg: rgba(185, 28, 28, 0.1);
+  --color-error-border: rgba(185, 28, 28, 0.45);
+  --color-error-text: #b91c1c;
   --color-surface: #f8f9fa;
   --color-border: #dadce0;
-  --color-status: #34a853;
+  --color-status: #15803d;
   --color-control-bg: #e8eaed;
-  --color-control-text: #202124;
+  --color-control-text: #1a1a1a;
   --color-subtle: #80868b;
   --color-overlay: rgba(0, 0, 0, 0.5);
   --color-modal-bg: #ffffff;
@@ -30,8 +34,15 @@
   --color-text: #ffffff;
   --color-text-muted: #9ca3af;
   --color-interim: #ffffff;
+  --color-accent: #2dd4bf;
+  --color-live: #dc2626;
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.12);
+  --color-error-border: rgba(248, 113, 113, 0.45);
+  --color-error-text: #f87171;
   --color-surface: #111111;
   --color-border: #2a2a2a;
+  --color-status: #4ade80;
   --color-control-bg: #262626;
   --color-control-text: #ffffff;
   --color-subtle: #9ca3af;
@@ -46,7 +57,14 @@
   --color-text: #ffffff;
   --color-text-muted: #cccccc;
   --color-interim: #ffffff;
+  --color-accent: #ffff00;
+  --color-live: #ff0000;
+  --color-error: #ff6b6b;
+  --color-error-bg: rgba(255, 107, 107, 0.15);
+  --color-error-border: #ff6b6b;
+  --color-error-text: #ff6b6b;
   --color-border: #ffffff;
+  --color-status: #ffff00;
   --color-control-bg: #ffffff;
   --color-control-text: #000000;
   --color-subtle: #cccccc;
@@ -92,7 +110,13 @@ html {
 }
 
 body {
-  font-family: Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    'Atkinson Hyperlegible',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
@@ -166,6 +190,37 @@ body {
   animation: waveform-pulse 0.9s ease-in-out infinite;
 }
 
+/* Minimal caption transitions — opacity only, no blur or motion */
+.caption-draft {
+  opacity: 0.75;
+}
+
+.caption-draft-updated {
+  animation: caption-draft-in 0.12s ease-out;
+}
+
+.caption-just-finalized {
+  animation: caption-finalize 0.15s ease-out;
+}
+
+@keyframes caption-draft-in {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0.75;
+  }
+}
+
+@keyframes caption-finalize {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -178,5 +233,15 @@ body {
   .waveform-bar {
     animation: none;
     transform: scaleY(0.7);
+  }
+
+  .caption-draft-updated,
+  .caption-just-finalized {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .caption-draft {
+    opacity: 0.75;
   }
 }

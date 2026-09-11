@@ -25,13 +25,17 @@ describe('contracts', () => {
     const event = parseServerMessage({
       type: 'transcript',
       id: 't1',
+      utteranceId: 'u1',
       text: 'hello',
       isFinal: false,
       timestampMs: 200,
+      stability: 0.7,
     });
     expect(event.type).toBe('transcript');
     if (event.type === 'transcript') {
       expect(event.text).toBe('hello');
+      expect(event.utteranceId).toBe('u1');
+      expect(event.stability).toBe(0.7);
     }
   });
 

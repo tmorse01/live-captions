@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
-          'Roboto',
+          'Atkinson Hyperlegible',
           'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',

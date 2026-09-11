@@ -1,39 +1,53 @@
+import {
+  Captions as LucideCaptions,
+  Play as LucidePlay,
+  Settings as LucideSettings,
+  Square as LucideSquare,
+  X as LucideX,
+  type LucideProps,
+} from 'lucide-react';
+
 interface IconProps {
   className?: string;
 }
 
+const iconDefaults: Pick<LucideProps, 'aria-hidden' | 'strokeWidth'> = {
+  'aria-hidden': true,
+  strokeWidth: 2,
+};
+
+export function BrandMark({ className, size = 20 }: IconProps & { size?: number }) {
+  return <LucideCaptions className={className} size={size} {...iconDefaults} />;
+}
+
 export function SettingsIcon({ className }: IconProps) {
+  return <LucideSettings className={className} size={24} {...iconDefaults} />;
+}
+
+export function PlayIcon({ className }: IconProps) {
   return (
-    <svg
+    <LucidePlay
       className={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
+      size={28}
+      fill="currentColor"
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </svg>
+      {...iconDefaults}
+    />
   );
 }
 
 export function StopIcon({ className }: IconProps) {
   return (
-    <svg className={className} width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor" />
-    </svg>
+    <LucideSquare
+      className={className}
+      size={28}
+      fill="currentColor"
+      stroke="currentColor"
+      {...iconDefaults}
+    />
   );
 }
 
-export function PlayIcon({ className }: IconProps) {
-  return (
-    <svg className={className} width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 5v14l11-7z" fill="currentColor" />
-    </svg>
-  );
+export function CloseIcon({ className }: IconProps) {
+  return <LucideX className={className} size={24} {...iconDefaults} />;
 }

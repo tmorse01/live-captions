@@ -73,3 +73,7 @@ See [docs/deployment.md](docs/deployment.md) for Railway setup.
 ## Accessibility
 
 Built accessibility-first: ARIA live regions for captions, large touch targets (44px+), keyboard navigation, high-contrast theme, reduced motion support, and semantic HTML throughout.
+
+## Brand
+
+Visual identity, colors, typography, and icon rules: [docs/brand.md](docs/brand.md).

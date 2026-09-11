@@ -12,7 +12,12 @@ export function ErrorBanner({ error, onDismiss }: ErrorBannerProps) {
     <div
       role="alert"
       aria-live="assertive"
-      className="mx-4 mt-2 rounded-lg border border-red-500/50 bg-red-950/50 px-4 py-3 text-sm text-red-300"
+      className="mx-4 mt-2 rounded-lg border px-4 py-3 text-sm"
+      style={{
+        borderColor: 'var(--color-error-border)',
+        backgroundColor: 'var(--color-error-bg)',
+        color: 'var(--color-error-text)',
+      }}
     >
       <div className="flex items-start justify-between gap-2">
         <p>{error.message}</p>

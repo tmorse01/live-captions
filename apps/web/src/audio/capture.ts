@@ -27,8 +27,8 @@ export class AudioCapture {
     const inputSampleRate = this.context.sampleRate;
     this.source = this.context.createMediaStreamSource(this.stream);
 
-    // ScriptProcessor for broad mobile Safari compatibility
-    this.processor = this.context.createScriptProcessor(4096, 1, 1);
+    // ScriptProcessor for broad mobile Safari compatibility (~128ms at 16 kHz)
+    this.processor = this.context.createScriptProcessor(2048, 1, 1);
     this.processor.onaudioprocess = (event) => {
       if (!this.onChunk) return;
       const input = event.inputBuffer.getChannelData(0);

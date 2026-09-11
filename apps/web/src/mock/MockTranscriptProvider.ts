@@ -23,16 +23,27 @@ export class MockTranscriptProvider {
     this.stop();
     this.index = 0;
 
+    let utteranceCounter = 0;
+    let currentUtteranceId = '';
+
     this.interval = setInterval(() => {
       const entry = MOCK_CONVERSATION[this.index % MOCK_CONVERSATION.length];
       if (!entry) return;
 
+      const prevEntry =
+        this.index > 0 ? MOCK_CONVERSATION[(this.index - 1) % MOCK_CONVERSATION.length] : null;
+      if (this.index === 0 || prevEntry?.isFinal) {
+        currentUtteranceId = `mock-u-${++utteranceCounter}`;
+      }
+
       onTranscript({
         type: 'transcript',
         id: `mock-${++this.counter}`,
+        utteranceId: currentUtteranceId,
         text: entry.text,
         isFinal: entry.isFinal,
         timestampMs: Date.now(),
+        ...(!entry.isFinal ? { stability: 0.5 } : {}),
       });
 
       this.index++;

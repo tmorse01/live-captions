@@ -69,7 +69,8 @@ export function ControlBar({
           type="button"
           onClick={isActive ? onStop : onStart}
           disabled={disabled}
-          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-[#ea4335] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          style={{ backgroundColor: 'var(--color-live)' }}
           aria-label={isActive ? 'Stop captioning' : 'Start captioning'}
         >
           {isActive ? <StopIcon /> : <PlayIcon />}

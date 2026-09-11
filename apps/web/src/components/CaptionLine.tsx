@@ -1,9 +1,13 @@
+import { useEffect, useRef, useState } from 'react';
+
 export type CaptionVariant = 'history' | 'active' | 'interim';
 
 interface CaptionLineProps {
-  text: string;
+  committedText: string;
+  draftText?: string;
   variant: CaptionVariant;
   timestampMs?: number;
+  utteranceKey?: string;
 }
 
 function formatTime(timestampMs: number): string {
@@ -13,22 +17,67 @@ function formatTime(timestampMs: number): string {
   });
 }
 
-export function CaptionLine({ text, variant, timestampMs }: CaptionLineProps) {
+export function CaptionLine({
+  committedText,
+  draftText = '',
+  variant,
+  timestampMs,
+}: CaptionLineProps) {
   const isHistory = variant === 'history';
   const isInterim = variant === 'interim';
+  const hasDraft = draftText.length > 0;
+
+  const prevDraftLenRef = useRef(0);
+  const prevVariantRef = useRef(variant);
+  const [draftUpdated, setDraftUpdated] = useState(false);
+  const [justFinalized, setJustFinalized] = useState(false);
+
+  useEffect(() => {
+    if (isInterim && draftText.length > prevDraftLenRef.current) {
+      setDraftUpdated(true);
+      const timer = window.setTimeout(() => setDraftUpdated(false), 150);
+      prevDraftLenRef.current = draftText.length;
+      return () => window.clearTimeout(timer);
+    }
+    prevDraftLenRef.current = draftText.length;
+  }, [draftText, isInterim]);
+
+  useEffect(() => {
+    if (prevVariantRef.current === 'interim' && variant === 'active') {
+      setJustFinalized(true);
+      const timer = window.setTimeout(() => setJustFinalized(false), 150);
+      prevVariantRef.current = variant;
+      return () => window.clearTimeout(timer);
+    }
+    prevVariantRef.current = variant;
+  }, [variant]);
+
+  const textColor = isHistory ? 'var(--color-text-muted)' : 'var(--color-text)';
 
   return (
     <article className="mb-6 last:mb-0">
       <p
-        className={`leading-[var(--caption-line-height)] ${
+        className={`leading-[var(--caption-line-height)] transition-[font-size] duration-150 ${
           isHistory ? 'font-normal' : 'font-bold tracking-tight'
-        } ${isInterim ? 'opacity-90' : ''}`}
+        } ${justFinalized ? 'caption-just-finalized' : ''}`}
         style={{
           fontSize: isHistory ? 'var(--caption-font-size-history)' : 'var(--caption-font-size)',
-          color: isHistory ? 'var(--color-text-muted)' : 'var(--color-text)',
         }}
       >
-        {text}
+        {committedText && (
+          <span style={{ color: textColor }}>{committedText}</span>
+        )}
+        {hasDraft && (
+          <>
+            {committedText ? ' ' : null}
+            <span
+              className={`caption-draft${draftUpdated ? ' caption-draft-updated' : ''}`}
+              style={{ color: isInterim ? 'var(--color-text-muted)' : textColor }}
+            >
+              {draftText}
+            </span>
+          </>
+        )}
       </p>
       {isHistory && timestampMs !== undefined && (
         <time

@@ -25,9 +25,13 @@ export const ClientMessageSchema = z.discriminatedUnion('type', [
 export const TranscriptEventSchema = z.object({
   type: z.literal('transcript'),
   id: z.string(),
+  /** Stable id for all interim + final events in one spoken phrase */
+  utteranceId: z.string().optional(),
   text: z.string(),
   isFinal: z.boolean(),
   timestampMs: z.number(),
+  /** GCP interim stability 0–1; omitted for finals */
+  stability: z.number().min(0).max(1).optional(),
 });
 
 export const StatusStateSchema = z.enum(['idle', 'listening', 'processing', 'reconnecting']);

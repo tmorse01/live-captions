@@ -40,6 +40,30 @@ Note: `capture→receive` bundles network upload, server processing, and GCP spe
 
 Tags show text labels (GOOD / OK / BAD) in addition to color.
 
+## Perceived speed improvements (2026-03)
+
+### Display smoothing (committed + draft)
+
+Interim captions now use a **committed + draft** merge policy (`apps/web/src/realtime/transcript-display.ts`):
+
+- Stable words lock forward and never shrink mid-utterance
+- Trailing guesses render in muted draft text
+- Layout keeps the previous active line pinned until the new interim draft exceeds 3 characters
+
+This eliminates the visible "flash back" when ASR sends shorter correction interims.
+
+### Audio capture buffer
+
+| Setting | Before | After | Expected impact |
+|---------|--------|-------|-----------------|
+| ScriptProcessor buffer | 4096 samples (~256 ms @ 16 kHz) | 2048 samples (~128 ms @ 16 kHz) | ~128 ms faster time-to-first-audio-chunk |
+
+`RealtimeClient` sends each captured chunk immediately — no client-side batching queue.
+
+### Utterance identity
+
+Transcript events now include `utteranceId` (stable per phrase) and optional GCP `stability` for interim results. This gives React stable keys and cleaner interim→final correlation.
+
 ## Testing procedure
 
 1. `pnpm dev` with `VITE_LATENCY_DEBUG=true`
@@ -47,13 +71,14 @@ Tags show text labels (GOOD / OK / BAD) in addition to color.
 3. Record from the latency bar:
    - First interim (GOOD/OK/BAD)
    - Rolling p50 and p95 after ~10 updates
-4. Repeat on production: https://live-captions.up.railway.app (compare LAN vs cloud)
+4. Verify no visible text shrink during mid-phrase ASR corrections
+5. Repeat on production: https://live-captions.up.railway.app (compare LAN vs cloud)
 
 ## Baseline results (fill in)
 
 | Environment | First interim p50 | capture→receive p50 | capture→receive p95 | Notes |
 |-------------|-------------------|---------------------|---------------------|-------|
-| Local (desktop) | — | — | — | |
+| Local (desktop) | — | — | — | Post buffer reduction |
 | Local (phone LAN) | — | — | — | `pnpm dev:network` |
 | Production | — | — | — | Railway |
 

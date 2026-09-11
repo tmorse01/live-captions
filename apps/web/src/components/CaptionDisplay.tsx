@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { CaptionLine as CaptionLineType } from '../realtime/transcript-buffer';
+import { computeCaptionLayout, getActiveLineKey } from '../realtime/caption-layout';
 import { CaptionLine } from './CaptionLine';
 
 interface CaptionDisplayProps {
@@ -11,17 +12,23 @@ interface CaptionDisplayProps {
 export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeEndRef = useRef<HTMLDivElement>(null);
+  const prevActiveTextRef = useRef('');
+
+  const { historyLines, activeLine, activeVariant } = computeCaptionLayout(
+    finalizedLines,
+    interimLine,
+  );
+
+  const activeText = activeLine?.text ?? '';
 
   useEffect(() => {
-    activeEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [finalizedLines, interimLine]);
+    if (activeText.length >= prevActiveTextRef.current.length) {
+      activeEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    prevActiveTextRef.current = activeText;
+  }, [activeText, historyLines.length]);
 
   const isEmpty = finalizedLines.length === 0 && !interimLine;
-  const historyLines = interimLine ? finalizedLines : finalizedLines.slice(0, -1);
-  const lastFinalized =
-    !interimLine && finalizedLines.length > 0
-      ? finalizedLines[finalizedLines.length - 1]
-      : null;
 
   return (
     <section
@@ -34,8 +41,9 @@ export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionD
           <div aria-live="off" className="mb-4">
             {historyLines.map((line) => (
               <CaptionLine
-                key={line.id}
-                text={line.text}
+                key={getActiveLineKey(line)}
+                committedText={line.committedText || line.text}
+                draftText={line.draftText}
                 variant="history"
                 timestampMs={line.timestampMs}
               />
@@ -44,15 +52,15 @@ export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionD
         )}
 
         <div className="mt-auto flex flex-col justify-end" ref={activeEndRef}>
-          {interimLine && (
+          {activeLine && activeVariant && (
             <div aria-live="polite" aria-atomic="true">
-              <CaptionLine text={interimLine.text} variant="interim" />
-            </div>
-          )}
-
-          {!interimLine && lastFinalized && (
-            <div aria-live="polite" aria-atomic="true">
-              <CaptionLine text={lastFinalized.text} variant="active" />
+              <CaptionLine
+                key={getActiveLineKey(activeLine)}
+                committedText={activeLine.committedText || activeLine.text}
+                draftText={activeLine.draftText}
+                variant={activeVariant}
+                timestampMs={activeVariant === 'active' ? activeLine.timestampMs : undefined}
+              />
             </div>
           )}
 

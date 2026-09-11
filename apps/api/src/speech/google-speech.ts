@@ -14,6 +14,9 @@ class GoogleSpeechProvider implements SpeechProvider {
   private stream: StreamingRecognizeStream | null = null;
   private callbacks: SpeechProviderCallbacks | null = null;
   private transcriptCounter = 0;
+  private utteranceCounter = 0;
+  private currentUtteranceId = '';
+  private lastWasFinal = true;
 
   constructor(client: SpeechClient) {
     this.client = client;
@@ -22,6 +25,9 @@ class GoogleSpeechProvider implements SpeechProvider {
   start(callbacks: SpeechProviderCallbacks): void {
     this.callbacks = callbacks;
     this.transcriptCounter = 0;
+    this.utteranceCounter = 0;
+    this.currentUtteranceId = '';
+    this.lastWasFinal = true;
 
     this.stream = this.client.streamingRecognize({
       config: {
@@ -41,12 +47,23 @@ class GoogleSpeechProvider implements SpeechProvider {
       const text = alternative.transcript ?? '';
       if (!text.trim()) return;
 
+      const isFinal = Boolean(result.isFinal);
+      if (this.lastWasFinal || !this.currentUtteranceId) {
+        this.currentUtteranceId = `u-${++this.utteranceCounter}`;
+      }
+      this.lastWasFinal = isFinal;
+
+      const stability =
+        !isFinal && typeof result.stability === 'number' ? result.stability : undefined;
+
       const event: TranscriptEvent = {
         type: 'transcript',
         id: `t-${++this.transcriptCounter}`,
+        utteranceId: this.currentUtteranceId,
         text,
-        isFinal: Boolean(result.isFinal),
+        isFinal,
         timestampMs: Date.now(),
+        ...(stability !== undefined ? { stability } : {}),
       };
 
       this.callbacks?.onTranscript(event);
@@ -96,17 +113,25 @@ export class MockSpeechProvider implements SpeechProvider {
   start(callbacks: SpeechProviderCallbacks): void {
     this.counter = 0;
     let phraseIndex = 0;
+    let utteranceCounter = 0;
+    let currentUtteranceId = '';
 
     this.interval = setInterval(() => {
       const text = this.phrases[phraseIndex % this.phrases.length]!;
       const isFinal = phraseIndex % this.phrases.length === this.phrases.length - 1;
 
+      if (phraseIndex % this.phrases.length === 0) {
+        currentUtteranceId = `mock-u-${++utteranceCounter}`;
+      }
+
       callbacks.onTranscript({
         type: 'transcript',
         id: `mock-${++this.counter}`,
+        utteranceId: currentUtteranceId,
         text,
         isFinal,
         timestampMs: Date.now(),
+        ...(!isFinal ? { stability: 0.4 + (phraseIndex % this.phrases.length) * 0.1 } : {}),
       });
 
       phraseIndex++;

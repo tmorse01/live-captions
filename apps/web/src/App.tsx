@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { CaptionDisplay } from './components/CaptionDisplay';
 import { ControlBar } from './components/ControlBar';
 import { ErrorBanner } from './components/ErrorBanner';
-import { SettingsIcon } from './components/icons';
+import { BrandMark, SettingsIcon } from './components/icons';
 import { LatencyDebugPanel } from './components/LatencyDebugPanel';
 import { ListeningIndicator } from './components/ListeningIndicator';
 import { SettingsSheet } from './components/SettingsSheet';
@@ -50,7 +50,10 @@ export default function App() {
           <ListeningIndicator active={isListening} />
         </div>
 
-        <h1 className="text-base font-medium tracking-wide">Live Captions</h1>
+        <h1 className="flex items-center gap-2 text-base font-bold tracking-wide">
+          <BrandMark size={20} className="text-[var(--color-accent)]" />
+          Live Captions
+        </h1>
 
         <button
           type="button"

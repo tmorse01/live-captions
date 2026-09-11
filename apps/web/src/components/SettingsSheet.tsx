@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { TextSize, Theme } from '../hooks/usePreferences';
+import { CloseIcon } from './icons';
 
 interface SettingsSheetProps {
   open: boolean;
@@ -66,17 +67,17 @@ export function SettingsSheet({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-center justify-between">
-          <h2 id="settings-title" className="text-xl font-medium">
+          <h2 id="settings-title" className="text-xl font-bold">
             Settings
           </h2>
           <button
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px] rounded-lg px-3 py-2 text-[var(--color-subtle)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[var(--color-subtle)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2"
             aria-label="Close settings"
           >
-            Close
+            <CloseIcon />
           </button>
         </div>
 
