@@ -1,7 +1,8 @@
-import { PlayIcon, StopIcon } from './icons';
+import { LoadingIcon, PlayIcon, StopIcon } from './icons';
 
 interface ControlBarProps {
   isActive: boolean;
+  isLoading?: boolean;
   disabled?: boolean;
   canDecreaseTextSize: boolean;
   canIncreaseTextSize: boolean;
@@ -44,6 +45,7 @@ function FontSizeButton({
 
 export function ControlBar({
   isActive,
+  isLoading,
   disabled,
   canDecreaseTextSize,
   canIncreaseTextSize,
@@ -71,11 +73,16 @@ export function ControlBar({
           disabled={disabled}
           className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-live)' }}
-          aria-label={isActive ? 'Stop captioning' : 'Start captioning'}
+          aria-label={
+            isLoading ? 'Requesting microphone' : isActive ? 'Stop captioning' : 'Start captioning'
+          }
+          aria-busy={isLoading}
         >
-          {isActive ? <StopIcon /> : <PlayIcon />}
+          {isLoading ? <LoadingIcon /> : isActive ? <StopIcon /> : <PlayIcon />}
         </button>
-        <span className="text-xs text-[var(--color-subtle)]">{isActive ? 'Stop' : 'Start'}</span>
+        <span className="text-xs text-[var(--color-subtle)]">
+          {isLoading ? 'Starting…' : isActive ? 'Stop' : 'Start'}
+        </span>
       </div>
 
       <FontSizeButton

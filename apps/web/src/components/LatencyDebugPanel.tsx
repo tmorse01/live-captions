@@ -38,7 +38,7 @@ export function LatencyDebugPanel() {
       }}
     >
       {hasHighLatency && (
-        <p className="mb-1 font-medium text-red-400">High latency detected</p>
+        <p className="mb-1 font-bold text-[var(--color-error)]">High latency detected</p>
       )}
 
       <div className="flex flex-wrap items-center gap-2">

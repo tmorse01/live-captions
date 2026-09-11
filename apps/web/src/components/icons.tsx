@@ -1,8 +1,11 @@
 import {
   Captions as LucideCaptions,
+  Loader2 as LucideLoader2,
+  Mic as LucideMic,
   Play as LucidePlay,
   Settings as LucideSettings,
   Square as LucideSquare,
+  WifiOff as LucideWifiOff,
   X as LucideX,
   type LucideProps,
 } from 'lucide-react';
@@ -50,4 +53,18 @@ export function StopIcon({ className }: IconProps) {
 
 export function CloseIcon({ className }: IconProps) {
   return <LucideX className={className} size={24} {...iconDefaults} />;
+}
+
+export function LoadingIcon({ className }: IconProps) {
+  return (
+    <LucideLoader2 className={`icon-spin ${className ?? ''}`} size={28} {...iconDefaults} />
+  );
+}
+
+export function MicIcon({ className, size = 24 }: IconProps & { size?: number }) {
+  return <LucideMic className={className} size={size} {...iconDefaults} />;
+}
+
+export function WifiOffIcon({ className, size = 24 }: IconProps & { size?: number }) {
+  return <LucideWifiOff className={className} size={size} {...iconDefaults} />;
 }

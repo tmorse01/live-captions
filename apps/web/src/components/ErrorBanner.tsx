@@ -3,9 +3,10 @@ import type { ErrorEvent } from '@live-captions/contracts';
 interface ErrorBannerProps {
   error: ErrorEvent | null;
   onDismiss?: () => void;
+  onRetry?: () => void;
 }
 
-export function ErrorBanner({ error, onDismiss }: ErrorBannerProps) {
+export function ErrorBanner({ error, onDismiss, onRetry }: ErrorBannerProps) {
   if (!error) return null;
 
   return (
@@ -19,17 +20,30 @@ export function ErrorBanner({ error, onDismiss }: ErrorBannerProps) {
         color: 'var(--color-error-text)',
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p>{error.message}</p>
-        {error.recoverable && onDismiss && (
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="shrink-0 underline focus:outline-none focus-visible:ring-2"
-            aria-label="Dismiss error"
-          >
-            Dismiss
-          </button>
+      <div className="flex items-start justify-between gap-3">
+        <p className="flex-1">{error.message}</p>
+        {error.recoverable && (
+          <div className="flex shrink-0 gap-3">
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="font-bold underline focus:outline-none focus-visible:ring-2"
+              >
+                Try again
+              </button>
+            )}
+            {onDismiss && (
+              <button
+                type="button"
+                onClick={onDismiss}
+                className="underline focus:outline-none focus-visible:ring-2"
+                aria-label="Dismiss error"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

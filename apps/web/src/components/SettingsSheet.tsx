@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { TextSize, Theme } from '../hooks/usePreferences';
 import { CloseIcon } from './icons';
+import { PrivacyNotice } from './PrivacyNotice';
 
 interface SettingsSheetProps {
   open: boolean;
@@ -124,6 +125,13 @@ export function SettingsSheet({
         <p className="mt-6 text-xs text-[var(--color-subtle)]">
           Use A− and A+ at the bottom of the screen for quick size changes.
         </p>
+
+        <div
+          className="mt-6 border-t pt-4"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
+          <PrivacyNotice className="!px-0" />
+        </div>
       </div>
     </div>
   );

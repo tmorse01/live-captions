@@ -57,8 +57,10 @@ export function CaptionLine({
   return (
     <article className="mb-6 last:mb-0">
       <p
-        className={`leading-[var(--caption-line-height)] transition-[font-size] duration-150 ${
-          isHistory ? 'font-normal' : 'font-bold tracking-tight'
+        className={`leading-[var(--caption-line-height)] ${
+          isHistory
+            ? 'caption-history font-normal'
+            : 'font-bold tracking-tight'
         } ${justFinalized ? 'caption-just-finalized' : ''}`}
         style={{
           fontSize: isHistory ? 'var(--caption-font-size-history)' : 'var(--caption-font-size)',

@@ -20,6 +20,7 @@
   --color-surface: #f8f9fa;
   --color-border: #dadce0;
   --color-status: #15803d;
+  --color-warning: #b45309;
   --color-control-bg: #e8eaed;
   --color-control-text: #1a1a1a;
   --color-subtle: #80868b;
@@ -43,6 +44,7 @@
   --color-surface: #111111;
   --color-border: #2a2a2a;
   --color-status: #4ade80;
+  --color-warning: #fbbf24;
   --color-control-bg: #262626;
   --color-control-text: #ffffff;
   --color-subtle: #9ca3af;
@@ -65,6 +67,7 @@
   --color-error-text: #ff6b6b;
   --color-border: #ffffff;
   --color-status: #ffff00;
+  --color-warning: #ffff00;
   --color-control-bg: #ffffff;
   --color-control-text: #000000;
   --color-subtle: #cccccc;
@@ -190,7 +193,21 @@ body {
   animation: waveform-pulse 0.9s ease-in-out infinite;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Minimal caption transitions — opacity only, no blur or motion */
+.caption-history {
+  transition: font-size 0.45s ease-out, color 0.35s ease-out;
+}
+
 .caption-draft {
   opacity: 0.75;
 }
@@ -233,6 +250,10 @@ body {
   .waveform-bar {
     animation: none;
     transform: scaleY(0.7);
+  }
+
+  .icon-spin {
+    animation: none;
   }
 
   .caption-draft-updated,

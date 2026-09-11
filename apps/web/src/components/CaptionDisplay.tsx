@@ -1,34 +1,48 @@
-import { useEffect, useRef } from 'react';
-import type { CaptionLine as CaptionLineType } from '../realtime/transcript-buffer';
-import { computeCaptionLayout, getActiveLineKey } from '../realtime/caption-layout';
+import { useCallback, useEffect, useRef } from 'react';
+import type { HistoryBlock, LiveCaption } from '../hooks/useCaptionSession';
 import { CaptionLine } from './CaptionLine';
+import { IdlePrompt } from './IdlePrompt';
 
 interface CaptionDisplayProps {
-  finalizedLines: CaptionLineType[];
-  interimLine: CaptionLineType | null;
+  history: HistoryBlock[];
+  live: LiveCaption | null;
   status: string;
 }
 
-export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionDisplayProps) {
+const SCROLL_PIN_THRESHOLD_PX = 48;
+
+export function CaptionDisplay({ history, live, status }: CaptionDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const activeEndRef = useRef<HTMLDivElement>(null);
-  const prevActiveTextRef = useRef('');
+  const liveAnchorRef = useRef<HTMLDivElement>(null);
+  const userScrolledUpRef = useRef(false);
+  const prevLiveTextRef = useRef('');
 
-  const { historyLines, activeLine, activeVariant } = computeCaptionLayout(
-    finalizedLines,
-    interimLine,
-  );
+  const liveText = live
+    ? live.draftText
+      ? `${live.committedText} ${live.draftText}`.trim()
+      : live.committedText
+    : '';
 
-  const activeText = activeLine?.text ?? '';
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    userScrolledUpRef.current = distanceFromBottom > SCROLL_PIN_THRESHOLD_PX;
+  }, []);
 
   useEffect(() => {
-    if (activeText.length >= prevActiveTextRef.current.length) {
-      activeEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-    prevActiveTextRef.current = activeText;
-  }, [activeText, historyLines.length]);
+    if (userScrolledUpRef.current) return;
+    if (liveText.length < prevLiveTextRef.current.length && history.length === 0) return;
 
-  const isEmpty = finalizedLines.length === 0 && !interimLine;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    liveAnchorRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'end',
+    });
+    prevLiveTextRef.current = liveText;
+  }, [liveText, history.length]);
+
+  const isEmpty = history.length === 0 && !live;
 
   return (
     <section
@@ -36,37 +50,37 @@ export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionD
       className="flex flex-1 flex-col overflow-hidden px-5 pb-2 pt-4"
       aria-label="Live captions"
     >
-      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
-        {historyLines.length > 0 && (
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
+      >
+        {history.length > 0 && (
           <div aria-live="off" className="mb-4">
-            {historyLines.map((line) => (
+            {history.map((block) => (
               <CaptionLine
-                key={getActiveLineKey(line)}
-                committedText={line.committedText || line.text}
-                draftText={line.draftText}
+                key={block.id}
+                committedText={block.text}
                 variant="history"
-                timestampMs={line.timestampMs}
+                timestampMs={block.flushedAtMs}
               />
             ))}
           </div>
         )}
 
-        <div className="mt-auto flex flex-col justify-end" ref={activeEndRef}>
-          {activeLine && activeVariant && (
+        <div className="mt-auto flex flex-col justify-end" ref={liveAnchorRef}>
+          {live && (
             <div aria-live="polite" aria-atomic="true">
               <CaptionLine
-                key={getActiveLineKey(activeLine)}
-                committedText={activeLine.committedText || activeLine.text}
-                draftText={activeLine.draftText}
-                variant={activeVariant}
-                timestampMs={activeVariant === 'active' ? activeLine.timestampMs : undefined}
+                key={live.utteranceId}
+                committedText={live.committedText}
+                draftText={live.draftText}
+                variant={live.isInterim ? 'interim' : 'active'}
               />
             </div>
           )}
 
-          {isEmpty && status === 'idle' && (
-            <p className="text-center text-base text-[var(--color-subtle)]">Tap Start to begin captioning</p>
-          )}
+          {isEmpty && status === 'idle' && <IdlePrompt />}
 
           {isEmpty && status === 'listening' && (
             <p className="text-center text-base text-[var(--color-subtle)]">Listening…</p>
@@ -74,10 +88,6 @@ export function CaptionDisplay({ finalizedLines, interimLine, status }: CaptionD
 
           {status === 'requesting_mic' && (
             <p className="text-center text-base text-[var(--color-subtle)]">Requesting microphone…</p>
-          )}
-
-          {status === 'reconnecting' && (
-            <p className="text-center text-base text-amber-500">Reconnecting…</p>
           )}
         </div>
       </div>

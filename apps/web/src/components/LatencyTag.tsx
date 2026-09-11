@@ -9,7 +9,7 @@ interface LatencyTagProps {
 
 const RATING_STYLES: Record<LatencyRating, string> = {
   good: 'border-[var(--color-status)] text-[var(--color-status)]',
-  ok: 'border-amber-500 text-amber-600 dark:text-amber-400',
+  ok: 'border-[var(--color-warning)] text-[var(--color-warning)]',
   bad: 'border-[var(--color-error)] text-[var(--color-error)]',
 };
 

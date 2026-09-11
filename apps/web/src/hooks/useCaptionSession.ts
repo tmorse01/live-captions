@@ -2,10 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ErrorEvent, ServerMessage } from '@live-captions/contracts';
 import { AudioCapture, int16ToBase64 } from '../audio/capture';
 import { useMicrophone } from '../audio/useMicrophone';
+import {
+  CaptionSession,
+  type CaptionViewState,
+  type HistoryBlock,
+  type LiveCaption,
+} from '../realtime/caption-session';
 import { RealtimeClient, type ConnectionState } from '../realtime/client';
 import { getWsUrl } from '../realtime/ws-url';
 import { latencyTracker } from '../realtime/latency';
-import { TranscriptBuffer, type CaptionLine } from '../realtime/transcript-buffer';
 
 export type SessionStatus =
   | 'idle'
@@ -14,34 +19,28 @@ export type SessionStatus =
   | 'reconnecting'
   | 'error';
 
-export interface CaptionSessionState {
-  status: SessionStatus;
-  connectionState: ConnectionState;
-  micPermission: ReturnType<typeof useMicrophone>['permission'];
-  finalizedLines: CaptionLine[];
-  interimLine: CaptionLine | null;
-  error: ErrorEvent | null;
-}
+export type { HistoryBlock, LiveCaption, CaptionViewState };
 
 export function useCaptionSession() {
   const mic = useMicrophone();
   const [status, setStatus] = useState<SessionStatus>('idle');
   const [connectionState, setConnectionState] = useState<ConnectionState>('disconnected');
-  const [finalizedLines, setFinalizedLines] = useState<CaptionLine[]>([]);
-  const [interimLine, setInterimLine] = useState<CaptionLine | null>(null);
+  const [captionView, setCaptionView] = useState<CaptionViewState>({
+    history: [],
+    live: null,
+  });
   const [error, setError] = useState<ErrorEvent | null>(null);
 
   const clientRef = useRef<RealtimeClient | null>(null);
   const captureRef = useRef<AudioCapture | null>(null);
-  const bufferRef = useRef(new TranscriptBuffer());
+  const sessionRef = useRef(new CaptionSession());
 
   const handleServerMessage = useCallback((message: ServerMessage) => {
     switch (message.type) {
       case 'transcript': {
         latencyTracker.onTranscript(message);
-        const state = bufferRef.current.apply(message);
-        setFinalizedLines(state.finalized);
-        setInterimLine(state.interim);
+        const view = sessionRef.current.apply(message);
+        setCaptionView(view);
         latencyTracker.onRenderComplete();
         break;
       }
@@ -86,9 +85,8 @@ export function useCaptionSession() {
       return;
     }
 
-    bufferRef.current.reset();
-    setFinalizedLines([]);
-    setInterimLine(null);
+    sessionRef.current.reset();
+    setCaptionView({ history: [], live: null });
     latencyTracker.startSession();
 
     const client = new RealtimeClient({
@@ -98,8 +96,8 @@ export function useCaptionSession() {
         setConnectionState(state);
         if (state === 'reconnecting') {
           setStatus('reconnecting');
-          const cleared = bufferRef.current.clearInterim();
-          setInterimLine(cleared.interim);
+          const view = sessionRef.current.clearLiveInterim();
+          setCaptionView(view);
         }
       },
     });
@@ -137,9 +135,32 @@ export function useCaptionSession() {
     clientRef.current?.stop();
     clientRef.current?.disconnect();
     clientRef.current = null;
+    const view = sessionRef.current.endSession();
+    setCaptionView(view);
     setStatus('idle');
     setConnectionState('disconnected');
   }, []);
+
+  useEffect(() => {
+    if (status !== 'listening' && status !== 'reconnecting') return;
+
+    const timer = setInterval(() => {
+      const view = sessionRef.current.tick();
+      setCaptionView((prev) => {
+        if (
+          prev.history.length === view.history.length &&
+          prev.live?.committedText === view.live?.committedText &&
+          prev.live?.draftText === view.live?.draftText &&
+          prev.live?.isInterim === view.live?.isInterim
+        ) {
+          return prev;
+        }
+        return view;
+      });
+    }, 500);
+
+    return () => clearInterval(timer);
+  }, [status]);
 
   useEffect(() => {
     return () => {
@@ -152,8 +173,8 @@ export function useCaptionSession() {
     status,
     connectionState,
     micPermission: mic.permission,
-    finalizedLines,
-    interimLine,
+    history: captionView.history,
+    live: captionView.live,
     error,
     start,
     stop,
