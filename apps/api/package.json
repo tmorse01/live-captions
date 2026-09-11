@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@fastify/static": "^8.0.4",
     "@fastify/websocket": "^11.0.1",
     "@google-cloud/speech": "^6.7.0",
     "@live-captions/config": "workspace:*",

@@ -1,7 +1,9 @@
-# Railway monorepo configuration
-# Create two services pointing to this repo:
-#   live-captions-api  → apps/api
-#   live-captions-web  → apps/web
-
 [build]
 builder = "NIXPACKS"
+buildCommand = "pnpm build:prod"
+
+[deploy]
+startCommand = "node apps/api/dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

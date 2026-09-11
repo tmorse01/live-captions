@@ -1,92 +1,70 @@
-# Deployment (Railway)
+# Deployment (Railway — single service)
 
-Deploy **two services** from [github.com/tmorse01/live-captions](https://github.com/tmorse01/live-captions).
+One Railway service runs the API **and** serves the built React app from the same domain. WebSocket captions use `wss://your-domain/ws` on the same origin — no separate web service needed.
 
-## 1. Create Railway project
+## Prerequisites
 
-1. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo**
-2. Select `live-captions`
-3. Create **two services** from the same repo (duplicate the service or add a second)
+- GitHub repo pushed: `github.com/tmorse01/live-captions`
+- GCP service account JSON ready
+- Railway project `live-captions` created
 
-## 2. API service (`live-captions-api`)
+## Railway setup
 
-| Setting | Value |
-|---------|-------|
-| **Root directory** | `apps/api` |
-| **Start command** | `node dist/index.js` |
+1. Open your **live-captions** project in [Railway](https://railway.app)
+2. **New Service** → **GitHub Repo** → select `live-captions`
+3. Leave **root directory** as `/` (repo root)
+4. Railway reads [`railway.toml`](railway.toml) automatically:
+   - **Build:** `pnpm build:prod`
+   - **Start:** `node apps/api/dist/index.js`
+   - **Health check:** `/health`
 
-**Build command** (Settings → Build):
+## Environment variables
 
-```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @live-captions/contracts build && pnpm --filter @live-captions/config build && pnpm --filter @live-captions/api build
-```
-
-**Environment variables:**
+Set these on the service (**Variables** tab):
 
 | Variable | Value |
 |----------|-------|
+| `NODE_ENV` | `production` |
 | `GCP_PROJECT_ID` | Your GCP project ID |
 | `GCP_SERVICE_ACCOUNT_JSON` | Full contents of your service account JSON key |
-| `WEB_ORIGIN` | Your web URL (set after step 3), e.g. `https://live-captions-web-production.up.railway.app` |
-| `NODE_ENV` | `production` |
 
-Railway sets `PORT` automatically — the API reads it.
+`WEB_ORIGIN` is optional — if unset, the API uses `https://$RAILWAY_PUBLIC_DOMAIN` automatically.
 
-**Health check path:** `/health`
+Do **not** set `VITE_API_WS_URL` — the web app connects to `/ws` on the same host.
 
-Generate a public domain: Settings → Networking → **Generate Domain**
+## Generate domain
 
-Note the API URL, e.g. `https://live-captions-api-production.up.railway.app`
+Settings → **Networking** → **Generate Domain**
 
-## 3. Web service (`live-captions-web`)
+Your app is live at `https://live-captions-production.up.railway.app` (or similar).
 
-| Setting | Value |
-|---------|-------|
-| **Root directory** | `apps/web` |
-| **Start command** | `pnpm exec vite preview --host 0.0.0.0 --port $PORT` |
+## Verify
 
-**Build command:**
-
-```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @live-captions/contracts build && pnpm --filter @live-captions/ui build && pnpm --filter @live-captions/web build
-```
-
-**Environment variables (build time — Vite embeds these):**
-
-| Variable | Value |
-|----------|-------|
-| `VITE_API_WS_URL` | `wss://YOUR-API-DOMAIN.up.railway.app/ws` |
-
-Replace with your actual API domain from step 2.
-
-Generate a public domain for the web service.
-
-## 4. Finish API CORS
-
-Go back to the **API service** and set `WEB_ORIGIN` to your **web** domain (exact URL, including `https://`).
-
-Redeploy the API if it was deployed before this was set.
-
-## 5. Verify
-
-1. Open the web URL on your phone
+1. Open the Railway URL on your phone
 2. Tap **Start** → allow microphone
-3. Speak — captions should appear (HTTPS works natively on Railway)
+3. Speak — captions should appear
 
-## CLI alternative
+## CLI deploy
 
 ```bash
-# From repo root, with Railway CLI logged in
-railway login
-railway init
+railway link          # select live-captions project
+railway up            # deploy current branch
+railway domain        # generate public URL
+railway logs          # tail logs
 ```
 
-Create services in the dashboard with root directories as above — monorepo deploy is easiest via the UI.
+Set secrets via CLI:
 
-## Local vs production
+```bash
+railway variables set NODE_ENV=production
+railway variables set GCP_PROJECT_ID=your-project-id
+railway variables set GCP_SERVICE_ACCOUNT_JSON="$(Get-Content -Raw .\secrets\your-key.json)"
+```
 
-| | Local (phone on LAN) | Production (Railway) |
-|--|-------------------|---------------------|
-| Web | `https://192.168.x.x:5173` | `https://*.up.railway.app` |
-| WebSocket | Proxied via Vite `/ws` | `wss://api-domain/ws` |
-| GCP creds | `.env` file | `GCP_SERVICE_ACCOUNT_JSON` secret |
+## Local production smoke test
+
+```bash
+pnpm build:prod
+NODE_ENV=production node apps/api/dist/index.js
+# Open http://localhost:3001
+```
