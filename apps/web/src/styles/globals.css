@@ -77,24 +77,56 @@
   --color-debug-bg: #000000;
 }
 
-[data-text-size='small'] {
+/* 1–10 caption scale. Min values are the intended phone sizes so small
+   screens can go much larger than the old 4-step presets. */
+[data-text-size='1'] {
+  --caption-font-size: clamp(1.125rem, 4.2vw, 1.75rem);
+  --caption-font-size-history: clamp(0.75rem, 1.8vw, 0.9375rem);
+}
+
+[data-text-size='2'] {
   --caption-font-size: clamp(1.375rem, 5vw, 2.25rem);
   --caption-font-size-history: clamp(0.8125rem, 2vw, 1rem);
 }
 
-[data-text-size='medium'] {
-  --caption-font-size: clamp(1.75rem, 6vw, 3.25rem);
+[data-text-size='3'] {
+  --caption-font-size: clamp(1.5rem, 5.75vw, 2.75rem);
+  --caption-font-size-history: clamp(0.875rem, 2.25vw, 1.0625rem);
+}
+
+[data-text-size='4'] {
+  --caption-font-size: clamp(1.75rem, 6.5vw, 3.25rem);
   --caption-font-size-history: clamp(0.875rem, 2.5vw, 1.125rem);
 }
 
-[data-text-size='large'] {
-  --caption-font-size: clamp(2.125rem, 7vw, 4rem);
+[data-text-size='5'] {
+  --caption-font-size: clamp(2.125rem, 8vw, 4rem);
   --caption-font-size-history: clamp(1rem, 3vw, 1.25rem);
 }
 
-[data-text-size='xlarge'] {
-  --caption-font-size: clamp(2.5rem, 8vw, 5rem);
+[data-text-size='6'] {
+  --caption-font-size: clamp(2.5rem, 10vw, 5rem);
   --caption-font-size-history: clamp(1.125rem, 3.5vw, 1.375rem);
+}
+
+[data-text-size='7'] {
+  --caption-font-size: clamp(3.25rem, 13vw, 6.5rem);
+  --caption-font-size-history: clamp(1.25rem, 4vw, 1.625rem);
+}
+
+[data-text-size='8'] {
+  --caption-font-size: clamp(4.25rem, 16vw, 8rem);
+  --caption-font-size-history: clamp(1.5rem, 5vw, 2rem);
+}
+
+[data-text-size='9'] {
+  --caption-font-size: clamp(5.25rem, 20vw, 9.5rem);
+  --caption-font-size-history: clamp(1.75rem, 6vw, 2.25rem);
+}
+
+[data-text-size='10'] {
+  --caption-font-size: clamp(6.5rem, 24vw, 11rem);
+  --caption-font-size-history: clamp(2rem, 7vw, 2.75rem);
 }
 
 * {
@@ -206,6 +238,37 @@ body {
 /* Minimal caption transitions — opacity only, no blur or motion */
 .caption-history {
   transition: font-size 0.45s ease-out, color 0.35s ease-out;
+}
+
+.text-size-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-border);
+}
+
+.text-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-modal-bg);
+  box-shadow: 0 0 0 1px var(--color-border);
+  cursor: pointer;
+}
+
+.text-size-slider::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-modal-bg);
+  box-shadow: 0 0 0 1px var(--color-border);
+  cursor: pointer;
 }
 
 .caption-draft {

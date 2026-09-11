@@ -1,19 +1,50 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark' | 'high-contrast';
-export type TextSize = 'small' | 'medium' | 'large' | 'xlarge';
+export type TextSize = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type HistoryLimit = 3 | 5 | 10 | 'all';
 
 export interface Preferences {
   theme: Theme;
   textSize: TextSize;
+  historyLimit: HistoryLimit;
 }
 
-const TEXT_SIZE_ORDER: TextSize[] = ['small', 'medium', 'large', 'xlarge'];
+export const TEXT_SIZE_MIN = 1;
+export const TEXT_SIZE_MAX = 10;
+
+const LEGACY_TEXT_SIZES: Record<string, TextSize> = {
+  small: 2,
+  medium: 4,
+  large: 5,
+  xlarge: 6,
+};
 
 const DEFAULT_PREFERENCES: Preferences = {
   theme: 'light',
-  textSize: 'medium',
+  textSize: 4,
+  historyLimit: 'all',
 };
+
+function isTextSize(value: unknown): value is TextSize {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= TEXT_SIZE_MIN &&
+    value <= TEXT_SIZE_MAX
+  );
+}
+
+export function parseTextSize(value: unknown): TextSize {
+  if (isTextSize(value)) return value;
+  if (typeof value === 'string') {
+    const legacy = LEGACY_TEXT_SIZES[value];
+    if (legacy) return legacy;
+    const numeric = Number(value);
+    if (isTextSize(numeric)) return numeric;
+  }
+  return DEFAULT_PREFERENCES.textSize;
+}
 
 const THEME_COLORS: Record<Theme, string> = {
   light: '#ffffff',
@@ -25,16 +56,23 @@ export function usePreferences() {
   const [preferences, setPreferences] = useState<Preferences>(() => {
     try {
       const stored = localStorage.getItem('live-captions-prefs');
-      if (stored) return { ...DEFAULT_PREFERENCES, ...JSON.parse(stored) };
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<Preferences>;
+        return {
+          ...DEFAULT_PREFERENCES,
+          ...parsed,
+          textSize: parseTextSize(parsed.textSize),
+        };
+      }
     } catch {
       // ignore
     }
     return DEFAULT_PREFERENCES;
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = preferences.theme;
-    document.documentElement.dataset.textSize = preferences.textSize;
+    document.documentElement.dataset.textSize = String(preferences.textSize);
 
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
@@ -47,28 +85,29 @@ export function usePreferences() {
   }, []);
 
   const setTextSize = useCallback((textSize: TextSize) => {
-    setPreferences((prev) => ({ ...prev, textSize }));
+    setPreferences((prev) => ({ ...prev, textSize: parseTextSize(textSize) }));
+  }, []);
+
+  const setHistoryLimit = useCallback((historyLimit: HistoryLimit) => {
+    setPreferences((prev) => ({ ...prev, historyLimit }));
   }, []);
 
   const increaseTextSize = useCallback(() => {
-    setPreferences((prev) => {
-      const index = TEXT_SIZE_ORDER.indexOf(prev.textSize);
-      const next = TEXT_SIZE_ORDER[Math.min(index + 1, TEXT_SIZE_ORDER.length - 1)]!;
-      return { ...prev, textSize: next };
-    });
+    setPreferences((prev) => ({
+      ...prev,
+      textSize: Math.min(prev.textSize + 1, TEXT_SIZE_MAX) as TextSize,
+    }));
   }, []);
 
   const decreaseTextSize = useCallback(() => {
-    setPreferences((prev) => {
-      const index = TEXT_SIZE_ORDER.indexOf(prev.textSize);
-      const next = TEXT_SIZE_ORDER[Math.max(index - 1, 0)]!;
-      return { ...prev, textSize: next };
-    });
+    setPreferences((prev) => ({
+      ...prev,
+      textSize: Math.max(prev.textSize - 1, TEXT_SIZE_MIN) as TextSize,
+    }));
   }, []);
 
-  const canIncreaseTextSize =
-    TEXT_SIZE_ORDER.indexOf(preferences.textSize) < TEXT_SIZE_ORDER.length - 1;
-  const canDecreaseTextSize = TEXT_SIZE_ORDER.indexOf(preferences.textSize) > 0;
+  const canIncreaseTextSize = preferences.textSize < TEXT_SIZE_MAX;
+  const canDecreaseTextSize = preferences.textSize > TEXT_SIZE_MIN;
 
   useEffect(() => {
     localStorage.setItem('live-captions-prefs', JSON.stringify(preferences));
@@ -78,6 +117,7 @@ export function usePreferences() {
     preferences,
     setTheme,
     setTextSize,
+    setHistoryLimit,
     increaseTextSize,
     decreaseTextSize,
     canIncreaseTextSize,

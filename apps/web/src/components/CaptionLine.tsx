@@ -57,7 +57,7 @@ export function CaptionLine({
   return (
     <article className="mb-6 last:mb-0">
       <p
-        className={`leading-[var(--caption-line-height)] ${
+        className={`break-words leading-[var(--caption-line-height)] ${
           isHistory
             ? 'caption-history font-normal'
             : 'font-bold tracking-tight'

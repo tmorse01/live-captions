@@ -169,6 +169,11 @@ export function useCaptionSession() {
     };
   }, []);
 
+  const clearCaptions = useCallback(() => {
+    const view = sessionRef.current.reset();
+    setCaptionView(view);
+  }, []);
+
   return {
     status,
     connectionState,
@@ -178,6 +183,7 @@ export function useCaptionSession() {
     error,
     start,
     stop,
+    clearCaptions,
     isActive: status === 'listening' || status === 'reconnecting',
   };
 }
