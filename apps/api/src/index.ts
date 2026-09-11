@@ -3,11 +3,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
 import { parseApiEnv } from '@live-captions/config';
-import { bootstrapGcpCredentials } from './env-bootstrap.js';
 import { getActiveSpeechMode, registerRealtimeRoutes } from './realtime/routes.js';
 import { registerStaticWeb } from './static.js';
-
-bootstrapGcpCredentials();
 
 const env = parseApiEnv();
 const isProduction = process.env.NODE_ENV === 'production';

@@ -1,11 +1,19 @@
 import type { FastifyInstance } from 'fastify';
+import type { SpeechProviderFactory } from '../speech/provider.js';
 import {
   createSpeechProviderFactory,
   getSpeechProviderMode,
 } from '../speech/google-speech.js';
 import { RealtimeSession } from './session.js';
 
-const factory = createSpeechProviderFactory();
+let factory: SpeechProviderFactory | null = null;
+
+function getFactory(): SpeechProviderFactory {
+  if (!factory) {
+    factory = createSpeechProviderFactory();
+  }
+  return factory;
+}
 
 export function getActiveSpeechMode(): string {
   return getSpeechProviderMode();
@@ -13,7 +21,7 @@ export function getActiveSpeechMode(): string {
 
 export async function registerRealtimeRoutes(app: FastifyInstance): Promise<void> {
   app.get('/ws', { websocket: true }, (socket) => {
-    const session = new RealtimeSession(socket, factory);
+    const session = new RealtimeSession(socket, getFactory());
 
     socket.on('message', (raw) => {
       const data = Buffer.isBuffer(raw)

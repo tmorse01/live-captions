@@ -136,8 +136,17 @@ export class MockSpeechProviderFactory implements SpeechProviderFactory {
 
 export type SpeechProviderMode = 'google' | 'mock';
 
+function hasGcpCredentials(): boolean {
+  return Boolean(
+    process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GCP_SERVICE_ACCOUNT_JSON,
+  );
+}
+
 export function getSpeechProviderMode(): SpeechProviderMode {
-  if (process.env.USE_MOCK_SPEECH === 'true' || !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  if (process.env.USE_MOCK_SPEECH === 'true') {
+    return 'mock';
+  }
+  if (!hasGcpCredentials()) {
     return 'mock';
   }
   return 'google';
@@ -146,6 +155,10 @@ export function getSpeechProviderMode(): SpeechProviderMode {
 export function createSpeechProviderFactory(): SpeechProviderFactory {
   const mode = getSpeechProviderMode();
   if (mode === 'mock') {
+    const reason = process.env.USE_MOCK_SPEECH === 'true'
+      ? 'USE_MOCK_SPEECH=true'
+      : 'no GCP credentials found';
+    console.warn(`[speech] Using mock provider: ${reason}`);
     return new MockSpeechProviderFactory();
   }
   return new GoogleSpeechProviderFactory();
