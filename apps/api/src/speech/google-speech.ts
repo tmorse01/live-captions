@@ -134,8 +134,18 @@ export class MockSpeechProviderFactory implements SpeechProviderFactory {
   }
 }
 
-export function createSpeechProviderFactory(): SpeechProviderFactory {
+export type SpeechProviderMode = 'google' | 'mock';
+
+export function getSpeechProviderMode(): SpeechProviderMode {
   if (process.env.USE_MOCK_SPEECH === 'true' || !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    return 'mock';
+  }
+  return 'google';
+}
+
+export function createSpeechProviderFactory(): SpeechProviderFactory {
+  const mode = getSpeechProviderMode();
+  if (mode === 'mock') {
     return new MockSpeechProviderFactory();
   }
   return new GoogleSpeechProviderFactory();

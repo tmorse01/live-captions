@@ -19,3 +19,4 @@ playwright-report/
 gcp-*.json
 
 secrets/
+test-speech.wav

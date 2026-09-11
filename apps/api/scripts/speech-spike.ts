@@ -9,11 +9,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import speech from '@google-cloud/speech';
+import { loadMonorepoEnv } from '@live-captions/config';
 
 const SAMPLE_RATE = 16000;
 const ENCODING = 'LINEAR16' as const;
 
 async function main() {
+  const repoRoot = loadMonorepoEnv();
+  const credsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+  if (!credsPath) {
+    console.error('GOOGLE_APPLICATION_CREDENTIALS is not set.');
+    console.error('Add it to .env at the repo root (see .env.example).');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(credsPath)) {
+    console.error(`Credentials file not found: ${credsPath}`);
+    console.error(`Repo root: ${repoRoot}`);
+    process.exit(1);
+  }
+
+  console.log(`Using credentials: ${credsPath}`);
+
   const wavPath = process.argv[2];
   const client = new speech.SpeechClient();
 
