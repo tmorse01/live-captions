@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:network": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "speech-spike": "tsx scripts/speech-spike.ts"

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
+    "dev": "pnpm --filter @live-captions/api --filter @live-captions/web --parallel run dev",
+    "dev:network": "pnpm --filter @live-captions/api --filter @live-captions/web --parallel run dev:network",
     "build": "pnpm -r run build",
     "build:prod": "pnpm --filter @live-captions/contracts build && pnpm --filter @live-captions/config build && pnpm --filter @live-captions/ui build && pnpm --filter @live-captions/web build && pnpm --filter @live-captions/api build",
     "start": "node apps/api/dist/index.js",

@@ -38,12 +38,11 @@ export function useCaptionSession() {
   const handleServerMessage = useCallback((message: ServerMessage) => {
     switch (message.type) {
       case 'transcript': {
-        latencyTracker.mark('clientReceive');
-        latencyTracker.logPipeline('capture', 'clientReceive');
+        latencyTracker.onTranscript(message);
         const state = bufferRef.current.apply(message);
         setFinalizedLines(state.finalized);
         setInterimLine(state.interim);
-        latencyTracker.mark('render');
+        latencyTracker.onRenderComplete();
         break;
       }
       case 'status': {
@@ -90,7 +89,7 @@ export function useCaptionSession() {
     bufferRef.current.reset();
     setFinalizedLines([]);
     setInterimLine(null);
-    latencyTracker.reset();
+    latencyTracker.startSession();
 
     const client = new RealtimeClient({
       url: getWsUrl(),
@@ -114,9 +113,9 @@ export function useCaptionSession() {
 
     try {
       await capture.start((pcm, timestampMs) => {
-        latencyTracker.mark('capture');
+        latencyTracker.onCapture();
         client.sendAudio(int16ToBase64(pcm), timestampMs);
-        latencyTracker.mark('send');
+        latencyTracker.onAudioSent();
       });
       setStatus('listening');
     } catch (err) {
@@ -132,6 +131,7 @@ export function useCaptionSession() {
   }, [handleServerMessage, mic]);
 
   const stop = useCallback(() => {
+    latencyTracker.logSummary();
     captureRef.current?.stop();
     captureRef.current = null;
     clientRef.current?.stop();

@@ -50,6 +50,8 @@ export default function App() {
         </div>
       </header>
 
+      <LatencyDebugPanel />
+
       <ErrorBanner error={visibleError} onDismiss={() => setDismissedError(true)} />
 
       <CaptionDisplay
@@ -57,8 +59,6 @@ export default function App() {
         interimLine={session.interimLine}
         status={session.status}
       />
-
-      <LatencyDebugPanel />
 
       <footer className="flex flex-col items-center gap-4 px-4 py-6">
         <StartStopButton

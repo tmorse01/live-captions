@@ -9,7 +9,7 @@ export interface MicrophoneState {
 
 function getMicErrorMessage(err: unknown): string {
   if (!window.isSecureContext) {
-    return 'Microphone requires HTTPS. On your phone, use the https:// address (not http://).';
+    return 'Microphone requires HTTPS on this device. Run pnpm dev:network and use the https:// LAN URL.';
   }
 
   if (err instanceof DOMException) {
@@ -44,7 +44,7 @@ export function useMicrophone() {
       setState({
         permission: 'unsupported',
         error:
-          'Microphone requires HTTPS. On your phone, open the https:// address shown in the terminal (not http://).',
+          'Microphone requires HTTPS on this device. Run pnpm dev:network and open the https:// LAN address from the terminal.',
       });
       return false;
     }
