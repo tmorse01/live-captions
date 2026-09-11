@@ -2,61 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --caption-font-size: clamp(1.5rem, 5vw, 3rem);
-  --caption-line-height: 1.4;
-  --color-bg: #f8fafc;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --color-interim: #475569;
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
-  --color-error: #dc2626;
-  --color-surface: #ffffff;
-  --color-border: #e2e8f0;
-  --color-status: #16a34a;
+:root,
+[data-theme='light'] {
+  --caption-font-size: clamp(1.75rem, 6vw, 3.25rem);
+  --caption-font-size-history: clamp(0.875rem, 2.5vw, 1.125rem);
+  --caption-line-height: 1.25;
+  --color-bg: #ffffff;
+  --color-text: #202124;
+  --color-text-muted: #5f6368;
+  --color-interim: #202124;
+  --color-accent: #4285f4;
+  --color-error: #ea4335;
+  --color-surface: #f8f9fa;
+  --color-border: #dadce0;
+  --color-status: #34a853;
+  --color-control-bg: #e8eaed;
+  --color-control-text: #202124;
+  --color-subtle: #80868b;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-modal-bg: #ffffff;
+  --color-modal-hover: #f1f3f4;
+  --color-debug-bg: #f8f9fa;
 }
 
 [data-theme='dark'] {
-  --color-bg: #0f172a;
-  --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-interim: #cbd5e1;
-  --color-accent: #3b82f6;
-  --color-accent-hover: #60a5fa;
-  --color-error: #f87171;
-  --color-surface: #1e293b;
-  --color-border: #334155;
-  --color-status: #4ade80;
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-text-muted: #9ca3af;
+  --color-interim: #ffffff;
+  --color-surface: #111111;
+  --color-border: #2a2a2a;
+  --color-control-bg: #262626;
+  --color-control-text: #ffffff;
+  --color-subtle: #9ca3af;
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-modal-bg: #171717;
+  --color-modal-hover: #262626;
+  --color-debug-bg: #0a0a0a;
 }
 
 [data-theme='high-contrast'] {
   --color-bg: #000000;
   --color-text: #ffffff;
-  --color-text-muted: #ffffff;
-  --color-interim: #ffff00;
-  --color-accent: #ffff00;
-  --color-accent-hover: #ffff99;
-  --color-error: #ff4444;
-  --color-surface: #000000;
+  --color-text-muted: #cccccc;
+  --color-interim: #ffffff;
   --color-border: #ffffff;
-  --color-status: #00ff00;
+  --color-control-bg: #ffffff;
+  --color-control-text: #000000;
+  --color-subtle: #cccccc;
+  --color-overlay: rgba(0, 0, 0, 0.85);
+  --color-modal-bg: #000000;
+  --color-modal-hover: #1a1a1a;
+  --color-debug-bg: #000000;
 }
 
 [data-text-size='small'] {
-  --caption-font-size: clamp(1.25rem, 4vw, 2rem);
+  --caption-font-size: clamp(1.375rem, 5vw, 2.25rem);
+  --caption-font-size-history: clamp(0.8125rem, 2vw, 1rem);
 }
 
 [data-text-size='medium'] {
-  --caption-font-size: clamp(1.5rem, 5vw, 3rem);
+  --caption-font-size: clamp(1.75rem, 6vw, 3.25rem);
+  --caption-font-size-history: clamp(0.875rem, 2.5vw, 1.125rem);
 }
 
 [data-text-size='large'] {
-  --caption-font-size: clamp(2rem, 6vw, 4rem);
+  --caption-font-size: clamp(2.125rem, 7vw, 4rem);
+  --caption-font-size-history: clamp(1rem, 3vw, 1.25rem);
 }
 
 [data-text-size='xlarge'] {
-  --caption-font-size: clamp(2.5rem, 7vw, 5rem);
+  --caption-font-size: clamp(2.5rem, 8vw, 5rem);
+  --caption-font-size-history: clamp(1.125rem, 3.5vw, 1.375rem);
 }
 
 * {
@@ -70,8 +87,12 @@ body,
   margin: 0;
 }
 
+html {
+  background: var(--color-bg);
+}
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
@@ -131,6 +152,20 @@ body {
   border-width: 0;
 }
 
+@keyframes waveform-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.waveform-bar {
+  animation: waveform-pulse 0.9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -138,5 +173,10 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .waveform-bar {
+    animation: none;
+    transform: scaleY(0.7);
   }
 }

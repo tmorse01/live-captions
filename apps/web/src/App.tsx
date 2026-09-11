@@ -1,16 +1,24 @@
 import { useCallback, useState } from 'react';
 import { CaptionDisplay } from './components/CaptionDisplay';
+import { ControlBar } from './components/ControlBar';
 import { ErrorBanner } from './components/ErrorBanner';
+import { SettingsIcon } from './components/icons';
 import { LatencyDebugPanel } from './components/LatencyDebugPanel';
-import { PrivacyNotice } from './components/PrivacyNotice';
+import { ListeningIndicator } from './components/ListeningIndicator';
 import { SettingsSheet } from './components/SettingsSheet';
-import { StartStopButton } from './components/StartStopButton';
-import { StatusIndicator } from './components/StatusIndicator';
 import { useCaptionSession } from './hooks/useCaptionSession';
 import { usePreferences } from './hooks/usePreferences';
 
 export default function App() {
-  const { preferences, setTheme, setTextSize } = usePreferences();
+  const {
+    preferences,
+    setTheme,
+    setTextSize,
+    increaseTextSize,
+    decreaseTextSize,
+    canIncreaseTextSize,
+    canDecreaseTextSize,
+  } = usePreferences();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [dismissedError, setDismissedError] = useState(false);
 
@@ -26,28 +34,32 @@ export default function App() {
   }, [session]);
 
   const visibleError = session.error && !dismissedError ? session.error : null;
+  const isListening = session.status === 'listening' || session.status === 'reconnecting';
 
   return (
-    <div className="flex h-full min-h-[100dvh] flex-col">
+    <div className="flex h-full min-h-[100dvh] flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
       <a href="#captions" className="skip-link">
         Skip to captions
       </a>
+
       <header
-        className="flex items-center justify-between px-4 py-3"
+        className="relative flex items-center justify-center px-4 py-4"
         style={{ borderBottom: '1px solid var(--color-border)' }}
       >
-        <h1 className="text-lg font-semibold">Live Captions</h1>
-        <div className="flex items-center gap-4">
-          <StatusIndicator status={session.status} connectionState={session.connectionState} />
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="min-h-[44px] min-w-[44px] rounded-lg px-3 py-2 text-sm focus:outline-none focus-visible:ring-2"
-            aria-label="Open settings"
-          >
-            Settings
-          </button>
+        <div className="absolute left-4">
+          <ListeningIndicator active={isListening} />
         </div>
+
+        <h1 className="text-base font-medium tracking-wide">Live Captions</h1>
+
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          className="absolute right-4 flex h-11 w-11 items-center justify-center rounded-full text-[var(--color-subtle)] transition-colors hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          aria-label="Open settings"
+        >
+          <SettingsIcon />
+        </button>
       </header>
 
       <LatencyDebugPanel />
@@ -60,15 +72,16 @@ export default function App() {
         status={session.status}
       />
 
-      <footer className="flex flex-col items-center gap-4 px-4 py-6">
-        <StartStopButton
-          isActive={session.isActive}
-          disabled={session.status === 'requesting_mic'}
-          onStart={handleStart}
-          onStop={handleStop}
-        />
-        <PrivacyNotice />
-      </footer>
+      <ControlBar
+        isActive={session.isActive}
+        disabled={session.status === 'requesting_mic'}
+        canDecreaseTextSize={canDecreaseTextSize}
+        canIncreaseTextSize={canIncreaseTextSize}
+        onStart={handleStart}
+        onStop={handleStop}
+        onDecreaseTextSize={decreaseTextSize}
+        onIncreaseTextSize={increaseTextSize}
+      />
 
       <SettingsSheet
         open={settingsOpen}

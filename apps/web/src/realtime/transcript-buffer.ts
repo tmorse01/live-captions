@@ -4,6 +4,7 @@ export interface CaptionLine {
   id: string;
   text: string;
   isFinal: boolean;
+  timestampMs?: number;
 }
 
 const MAX_FINALIZED_LINES = 8;
@@ -14,9 +15,15 @@ export class TranscriptBuffer {
 
   apply(event: TranscriptEvent): { finalized: CaptionLine[]; interim: CaptionLine | null } {
     if (event.isFinal) {
-      this.finalized = [...this.finalized, { id: event.id, text: event.text, isFinal: true }].slice(
-        -MAX_FINALIZED_LINES,
-      );
+      this.finalized = [
+        ...this.finalized,
+        {
+          id: event.id,
+          text: event.text,
+          isFinal: true,
+          timestampMs: event.timestampMs,
+        },
+      ].slice(-MAX_FINALIZED_LINES);
       this.interim = null;
     } else {
       this.interim = { id: event.id, text: event.text, isFinal: false };

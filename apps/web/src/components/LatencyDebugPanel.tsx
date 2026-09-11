@@ -34,19 +34,15 @@ export function LatencyDebugPanel() {
       className="border-b px-4 py-2 text-xs"
       style={{
         borderColor: 'var(--color-border)',
-        backgroundColor: 'var(--color-surface)',
+        backgroundColor: 'var(--color-debug-bg)',
       }}
     >
       {hasHighLatency && (
-        <p className="mb-1 font-medium" style={{ color: 'var(--color-error)' }}>
-          High latency detected
-        </p>
+        <p className="mb-1 font-medium text-red-400">High latency detected</p>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold" style={{ color: 'var(--color-text-muted)' }}>
-          Latency
-        </span>
+        <span className="font-semibold text-[var(--color-subtle)]">Latency</span>
 
         <LatencyTag
           label="First interim"
@@ -102,7 +98,7 @@ export function LatencyDebugPanel() {
             valueMs={rolling.captureToReceiveP95}
             rating={p95Rating}
           />
-          <span style={{ color: 'var(--color-text-muted)' }}>(n={rolling.sampleCount})</span>
+          <span className="text-[var(--color-subtle)]">(n={rolling.sampleCount})</span>
         </div>
       )}
     </div>

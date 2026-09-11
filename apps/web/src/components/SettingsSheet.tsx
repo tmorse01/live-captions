@@ -11,7 +11,7 @@ interface SettingsSheetProps {
 }
 
 const THEMES: { value: Theme; label: string }[] = [
-  { value: 'light', label: 'Light' },
+  { value: 'light', label: 'Light (default)' },
   { value: 'dark', label: 'Dark' },
   { value: 'high-contrast', label: 'High contrast' },
 ];
@@ -34,9 +34,7 @@ export function SettingsSheet({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (open) {
-      closeButtonRef.current?.focus();
-    }
+    if (open) closeButtonRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -52,7 +50,8 @@ export function SettingsSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      style={{ backgroundColor: 'var(--color-overlay)' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-title"
@@ -60,18 +59,21 @@ export function SettingsSheet({
     >
       <div
         className="w-full max-w-md rounded-t-2xl p-6 sm:rounded-2xl"
-        style={{ backgroundColor: 'var(--color-surface)' }}
+        style={{
+          backgroundColor: 'var(--color-modal-bg)',
+          color: 'var(--color-text)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-center justify-between">
-          <h2 id="settings-title" className="text-xl font-semibold">
+          <h2 id="settings-title" className="text-xl font-medium">
             Settings
           </h2>
           <button
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px] rounded-lg px-3 py-2 focus:outline-none focus-visible:ring-2"
+            className="min-h-[44px] min-w-[44px] rounded-lg px-3 py-2 text-[var(--color-subtle)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2"
             aria-label="Close settings"
           >
             Close
@@ -79,13 +81,11 @@ export function SettingsSheet({
         </div>
 
         <fieldset className="mb-6 space-y-3">
-          <legend className="mb-2 text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
-            Theme
-          </legend>
+          <legend className="mb-2 text-sm text-[var(--color-subtle)]">Theme</legend>
           {THEMES.map((t) => (
             <label
               key={t.value}
-              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 py-2"
+              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-[var(--color-modal-hover)]"
             >
               <input
                 type="radio"
@@ -101,13 +101,11 @@ export function SettingsSheet({
         </fieldset>
 
         <fieldset className="space-y-3">
-          <legend className="mb-2 text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
-            Text size
-          </legend>
+          <legend className="mb-2 text-sm text-[var(--color-subtle)]">Text size preset</legend>
           {TEXT_SIZES.map((s) => (
             <label
               key={s.value}
-              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 py-2"
+              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-[var(--color-modal-hover)]"
             >
               <input
                 type="radio"
@@ -121,6 +119,10 @@ export function SettingsSheet({
             </label>
           ))}
         </fieldset>
+
+        <p className="mt-6 text-xs text-[var(--color-subtle)]">
+          Use A− and A+ at the bottom of the screen for quick size changes.
+        </p>
       </div>
     </div>
   );
