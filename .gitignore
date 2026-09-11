@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.local
+*.log
+.DS_Store
+Thumbs.db
+coverage/
+test-results/
+playwright-report/
+.vite/
+*.tsbuildinfo
+
+# GCP credentials — never commit
+*-credentials.json
+*-service-account.json
+gcp-*.json
+
+secrets/

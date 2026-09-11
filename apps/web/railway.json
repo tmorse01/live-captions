@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "cd ../.. && pnpm install && pnpm --filter @live-captions/contracts build && pnpm --filter @live-captions/ui build && pnpm --filter @live-captions/web build"
+  },
+  "deploy": {
+    "startCommand": "pnpm preview --host 0.0.0.0 --port $PORT",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 30
+  }
+}

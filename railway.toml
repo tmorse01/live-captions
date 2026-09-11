@@ -1,0 +1,7 @@
+# Railway monorepo configuration
+# Create two services pointing to this repo:
+#   live-captions-api  → apps/api
+#   live-captions-web  → apps/web
+
+[build]
+builder = "NIXPACKS"
